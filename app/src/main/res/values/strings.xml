@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">threadingNetwork</string>
+    <string name="lataa">lataa</string>
 </resources>
