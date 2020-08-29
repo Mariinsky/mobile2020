@@ -51,9 +51,9 @@ class MainActivity : AppCompatActivity() {
 
             row.setOnClickListener {
                 tekstiii.text = president.toString()
-                spinner.visibility = View.VISIBLE
-                hits.visibility = View.GONE
                 if (isNetworkAvailable()) {
+                    spinner.visibility = View.VISIBLE
+                    hits.visibility = View.GONE
                     viewModel.setQuery(president.name)
                 }
             }
