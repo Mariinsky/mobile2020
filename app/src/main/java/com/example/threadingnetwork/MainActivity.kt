@@ -1,41 +1,50 @@
 package com.example.threadingnetwork
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.ConnectivityManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.Message
+import android.util.Log
+import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.activity_main.*
-import java.io.InputStream
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.Exception
-import java.lang.StringBuilder
-import java.net.HttpURLConnection
 import java.net.URL
 
 class MainActivity : AppCompatActivity() {
-    private val mHandler: Handler = object :
-        Handler(Looper.getMainLooper()) {
-        override fun handleMessage(msg: Message) {
-            if (msg.what == 0) {
-                tekstii.text = msg.obj.toString()
-            }
-        }
-    }
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         if (isNetworkAvailable()) {
-            button1.isEnabled = true
-            button1.setOnClickListener {
-                val myRunnable = Conn(mHandler, "https://www.w3.org/TR/PNG/iso_8859-1.txt")
-                val myThread = Thread(myRunnable)
-                myThread.start()
+            try {
+                val url = URL("https://racecarsdirect.com/content/UserImages/100877/550844.jpg")
+                button1.isEnabled = true
+                button1.setOnClickListener {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        val img = getImg(url)
+                        showImg(img)
+                    }
+                }
+            } catch (e:Exception){
+                // TODO:
+                Log.i("XXX", e.toString())
             }
         }
+    }
+
+    private fun showImg(serverImg: Bitmap) {
+        kuva.setImageBitmap(serverImg)
+    }
+
+    private suspend fun getImg(url: URL): Bitmap = withContext(Dispatchers.IO) {
+        val imgStream = url.openConnection().getInputStream()
+        return@withContext BitmapFactory.decodeStream(imgStream)
     }
 
     private fun isNetworkAvailable(): Boolean =
@@ -43,33 +52,4 @@ class MainActivity : AppCompatActivity() {
                 as ConnectivityManager).isDefaultNetworkActive
 }
 
-class Conn(
-    mHand: Handler,
-    val url: String,
-) : Runnable {
 
-    private val myHandler = mHand
-
-    override fun run() {
-        try {
-            val url = URL(url)
-            val conn = url.openConnection() as HttpURLConnection
-
-            conn.requestMethod = "GET"
-
-            val iStream: InputStream = conn.inputStream
-            val text = iStream.bufferedReader().use { it.readText() }
-
-            val result = StringBuilder()
-            result.append(text)
-
-            val msg = myHandler.obtainMessage()
-            msg.what = 0
-            msg.obj = result.toString()
-            myHandler.sendMessage(msg)
-
-        } catch (e: Exception) {
-            //TODO: handle
-        }
-    }
-}
