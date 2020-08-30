@@ -13,6 +13,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.preference.PreferenceManager
 import com.google.android.gms.location.*
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.rxjava3.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_main.*
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -34,8 +39,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var firstLocation: Location
     private lateinit var geocoder: Geocoder
     private val polyLine = Polyline()
-    private val pathPoints= ArrayList<GeoPoint>()
+    private val pathPoints = ArrayList<GeoPoint>()
     val items = ArrayList<OverlayItem>()
+    private lateinit var locationSubject: PublishSubject<Location>
+    private lateinit var startUpdating: PublishSubject<Unit>
+    private val disposable = CompositeDisposable()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,7 +52,8 @@ class MainActivity : AppCompatActivity() {
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx))
         setContentView(R.layout.activity_main)
         this.title = "location"
-
+        locationSubject = PublishSubject.create()
+        startUpdating = PublishSubject.create()
 
         geocoder = Geocoder(this, Locale.getDefault())
         locationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -57,13 +66,27 @@ class MainActivity : AppCompatActivity() {
 
 
         nappi.setOnClickListener {
-            locationClient.requestLocationUpdates(
-                createLocationRequest(),
-                locationCallback(),
-                Looper.getMainLooper()
-            )
+            startUpdating.onNext(Unit)
         }
+
+        startUpdating
+            .observeOn(Schedulers.io())
+            .subscribe {
+                locationClient.requestLocationUpdates(
+                    createLocationRequest(),
+                    locationCallback(),
+                    Looper.getMainLooper()
+                )
+            }.addTo(disposable)
+
+        locationSubject
+            .subscribe {
+                map.overlays.clear()
+                map.controller.setCenter(GeoPoint(it.latitude, it.longitude))
+                updateMap(it)
+            }.addTo(disposable)
     }
+
 
     private fun checkPermission(): Boolean {
         if (ActivityCompat.checkSelfPermission(
@@ -97,44 +120,54 @@ class MainActivity : AppCompatActivity() {
         override fun onLocationResult(locationResult: LocationResult?) {
             locationResult ?: return
             for (location in locationResult.locations) {
-                if (!firstLocationSet) {
-                    firstLocation = location
-                    val startingPoint = GeoPoint(
-                        location.latitude,
-                        location.longitude
-                    )
-                    items.add(OverlayItem("Location", "${location.latitude} ${location.longitude}", startingPoint))
-
-                    map.controller.setCenter(
-                        startingPoint
-                    )
-                    firstLocationSet = true
-                }
-                val currentPoint = GeoPoint(
-                    location.latitude,
-                    location.longitude
-                )
-                val mOverlay = ItemizedOverlayWithFocus(
-                    items,
-                    object : OnItemGestureListener<OverlayItem?> {
-                        override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {
-                            //do something
-                            return true
-                        }
-
-                        override fun onItemLongPress(index: Int, item: OverlayItem?): Boolean {
-                            return false
-                        }
-                    }, this@MainActivity
-                )
-                pathPoints.add(currentPoint)
-                mOverlay.setFocusItemsOnTap(true)
-                polyLine.setPoints(pathPoints)
-                map.overlays.add(polyLine)
-                map.getOverlays().add(mOverlay)
-
+                locationSubject.onNext(location)
             }
         }
+    }
+
+    private fun updateMap(location: Location) {
+        if (!firstLocationSet) {
+            firstLocation = location
+            val startingPoint = GeoPoint(
+                location.latitude,
+                location.longitude
+            )
+            items.add(
+                OverlayItem(
+                    "Location",
+                    "${location.latitude} ${location.longitude}",
+                    startingPoint
+                )
+            )
+
+            map.controller.setCenter(
+                startingPoint
+            )
+            firstLocationSet = true
+        }
+        val currentPoint = GeoPoint(
+            location.latitude,
+            location.longitude
+        )
+        val mOverlay = ItemizedOverlayWithFocus(
+            items,
+            object : OnItemGestureListener<OverlayItem?> {
+                override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {
+                    //do something
+                    return true
+                }
+
+                override fun onItemLongPress(index: Int, item: OverlayItem?): Boolean {
+                    return false
+                }
+            }, this@MainActivity
+        )
+        map.overlays.clear()
+        pathPoints.add(currentPoint)
+        mOverlay.setFocusItemsOnTap(true)
+        polyLine.setPoints(pathPoints)
+        map.overlays.add(polyLine)
+        map.overlays.add(mOverlay)
     }
 
     private fun createLocationRequest(): LocationRequest? {
@@ -174,6 +207,12 @@ class MainActivity : AppCompatActivity() {
         }
             .create()
             .show()
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        disposable.clear()
     }
 }
 
