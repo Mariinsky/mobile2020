@@ -9,9 +9,10 @@
     tools:context=".MainActivity">
     <Button
         android:id="@+id/nappi"
+        android:enabled="false"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="refresh"/>
+        android:text="@string/start_updating_location"/>
     <TextView
         android:id="@+id/loccis"
         android:layout_width="match_parent"

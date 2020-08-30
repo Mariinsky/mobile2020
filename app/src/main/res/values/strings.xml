@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">threadingNetwork</string>
     <string name="lataa">lataa</string>
+    <string name="start_updating_location">Start updating location</string>
 </resources>

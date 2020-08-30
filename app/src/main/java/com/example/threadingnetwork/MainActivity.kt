@@ -3,52 +3,70 @@ package com.example.threadingnetwork
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
+import kotlin.math.roundToInt
 
+const val REQUEST_LOCATION_CODE = 100
 
 class MainActivity : AppCompatActivity() {
+
     private lateinit var locationClient: FusedLocationProviderClient
     private var firstLocationSet = false
     private lateinit var firstLocation: Location
+    private lateinit var geocoder: Geocoder
 
-    @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         this.title = "location"
+        locationClient = LocationServices.getFusedLocationProviderClient(this)
+        geocoder = Geocoder(this, Locale.getDefault())
+        checkPermission()
 
-        val locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult?) {
-                locationResult ?: return
-                for (location in locationResult.locations){
-                    if (!firstLocationSet) {
-                        firstLocation = location
-                        firstLocationSet = true
-                    }
-                    loccis.text =  location.longitude.toString() + " " + location.latitude.toString()
-                    distance.text = location.distanceTo(firstLocation).toString()
-                    if(firstLocation != null) {
-                        Log.i("XXX", firstLocation.distanceTo(location).toString())
-                    }
-                }
+        nappi.setOnClickListener {
+                locationClient.requestLocationUpdates(
+                    createLocationRequest(),
+                    locationCallback(),
+                    Looper.getMainLooper()
+                )
             }
         }
 
-        locationClient = LocationServices.getFusedLocationProviderClient(this)
-        nappi.setOnClickListener {
-            locationClient.requestLocationUpdates(createLocationRequest(),locationCallback, Looper.getMainLooper() )
+    private fun checkPermission(): Boolean {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED
+            && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION ), REQUEST_LOCATION_CODE)
+            return false
         }
+        nappi.isEnabled = true
+        return true
+    }
 
-
-
-
+    private fun locationCallback() = object : LocationCallback() {
+        @SuppressLint("SetTextI18n")
+        override fun onLocationResult(locationResult: LocationResult?) {
+            locationResult ?: return
+            for (location in locationResult.locations){
+                if (!firstLocationSet) {
+                    firstLocation = location
+                    firstLocationSet = true
+                }
+                val address = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                loccis.text =  "${address[0].locality}\n${address[0].getAddressLine(0)}"
+                distance.text = "Distance from origin: ${location.distanceTo(firstLocation).roundToInt() / 1000}km"
+            }
+        }
     }
 
     private fun createLocationRequest(): LocationRequest? {
@@ -59,43 +77,35 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-    private fun checkLastLocation(){
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION ), 1)
-            return
-        }
-        getLastLocation()
-
-    }
-
-    @SuppressLint("MissingPermission", "SetTextI18n")
-    private fun getLastLocation() {
-        locationClient.lastLocation.addOnSuccessListener(this) { location : Location? ->
-            if (location != null) {
-                loccis.text = location.latitude.toString() + " " + location.longitude.toString()
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode == REQUEST_LOCATION_CODE) {
+            when (grantResults[0]) {
+                PackageManager.PERMISSION_GRANTED -> nappi.isEnabled = true
+                PackageManager.PERMISSION_DENIED -> {
+                    Log.i("XXX", permissions.toString())
+                    if (shouldShowRequestPermissionRationale( Manifest.permission.ACCESS_FINE_LOCATION)) {
+                        showAlert(permissions, "LOCATION", REQUEST_LOCATION_CODE)
+                    }}
             }
         }
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        if (requestCode == 1) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION ), 1)
-        }
+    private fun showAlert(permissions: Array<String>, name: String, requestCode: Int) {
+        val builder = AlertDialog.Builder(this)
+        builder.apply {
+            setMessage("Persmission to $name is need to use this app")
+            setTitle("Permission needed")
+            setPositiveButton("I understand") { _, _ ->
+                ActivityCompat.requestPermissions(this@MainActivity, permissions, requestCode)
+                }
+            }
+            .create()
+            .show()
     }
-
-
 }
 
 
