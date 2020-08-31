@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun animateColor(view: View, f: Float) {
-        val newColor = Color.valueOf(MULT*f, MULT*f, MULT*f)
+        val newColor = Color.valueOf(1-MULT*f, 1-MULT*f, 1-MULT*f)
         ObjectAnimator.ofObject(view, "backgroundColor", ArgbEvaluator(), oldColor, newColor.toArgb())
             .setDuration(animationDuration.toLong())
             .start()
