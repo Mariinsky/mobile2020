@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var shouldStartAnimate = true
     private var MULT = 0f
     private var oldColor = Color.BLACK
-    private val animationDuration = 500
+    private val animationDuration = 700
     private val unsubscribeOnPause = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             .addTo(unsubscribeOnPause)
 
         updateDelaySubject
-            .throttleLast(animationDuration.toLong(), TimeUnit.MILLISECONDS)
+            .throttleLatest(animationDuration.toLong(), TimeUnit.MILLISECONDS)
             .subscribe {
                 shouldStartAnimate = true
             }
@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun animateColor(view: View, f: Float) {
-        val newColor = Color.valueOf(1-MULT*f, 1-MULT*f, 1-MULT*f)
+        val newColor = Color.valueOf(1-MULT*f, 1-MULT*f, 0f)
         ObjectAnimator.ofObject(view, "backgroundColor", ArgbEvaluator(), oldColor, newColor.toArgb())
             .setDuration(animationDuration.toLong())
             .start()
