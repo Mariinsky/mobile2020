@@ -45,24 +45,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    private fun init() {
-        sensorSubject = PublishSubject.create()
-        updateDelaySubject = PublishSubject.create()
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        if (sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT) != null) {
-            lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
-            MULT = 1f / lightSensor.maximumRange
-        } else {
-            Log.i("XXX", "no sensor available")
-        }
-    }
-
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onResume() {
         super.onResume()
+
         lightSensor.also { light ->
             sensorManager.registerListener(this, light, SensorManager.SENSOR_DELAY_NORMAL)
         }
+        
         sensorSubject
             .subscribe {
                 if (shouldStartAnimate) {
@@ -92,6 +82,18 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) { }
+
+    private fun init() {
+        sensorSubject = PublishSubject.create()
+        updateDelaySubject = PublishSubject.create()
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        if (sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT) != null) {
+            lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+            MULT = 1f / lightSensor.maximumRange
+        } else {
+            Log.i("XXX", "no sensor available")
+        }
+    }
 
     override fun onPause() {
         super.onPause()
