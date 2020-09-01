@@ -21,6 +21,7 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.concurrent.TimeUnit
+import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
@@ -94,6 +95,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             MULT = 1f / lightSensor.maximumRange
         } else {
             Log.i("XXX", "no sensor available")
+            finish()
+            exitProcess(0)
         }
     }
 
