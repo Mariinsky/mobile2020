@@ -1,5 +1,7 @@
 package com.example.threadingnetwork
-
+/**
+ *  Automatic "flashlight" the darker the environment the lighter the "box" gets.
+ * */
 import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.content.Context
@@ -52,7 +54,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         lightSensor.also { light ->
             sensorManager.registerListener(this, light, SensorManager.SENSOR_DELAY_NORMAL)
         }
-        
+
         sensorSubject
             .subscribe {
                 if (shouldStartAnimate) {
