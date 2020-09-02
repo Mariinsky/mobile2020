@@ -4,21 +4,58 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:padding="20dp"
     tools:context=".MainActivity"
-    android:orientation="vertical">
+    android:background="@color/colorPrimary">
 
     <Button
         android:id="@+id/button"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:background="@color/colorAccent"
+        android:textColor="@color/colorPrimaryDark"
+        android:text="@string/start_scan" />
 
-    <TextView
-        android:id="@+id/tekstii"
-        android:text="MORO"
+    <ProgressBar
+        android:id="@+id/progress"
+        android:visibility="gone"
+        android:padding="50dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent"/>
 
+    <ScrollView
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/str"
+                android:textColor="@android:color/white"
+                android:textAlignment="center"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="6"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/adress"
+                android:textColor="@android:color/white"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:textAlignment="center"
+                android:textSize="20sp" />
+
+        </LinearLayout>
+
+    </ScrollView>
 
 
 </LinearLayout>
