@@ -11,31 +11,48 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.teksiview.view.*
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bluetoothManager: BluetoothManager
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var bluetoothLeScanner: BluetoothLeScanner
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var viewAdapter: RecyclerView.Adapter<*>
+    private lateinit var viewManager: RecyclerView.LayoutManager
     private var scanResults: HashMap<String, ScanResult>? = null
+    private var keys = mutableListOf<String>()
     private var mScanning = false
     private val handler = Handler()
 
-    private val SCAN_PERIOD: Long = 5000
+    private val SCAN_PERIOD: Long = 3000
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         title = "Ultimate BT scanner 0.1"
+        scanResults = HashMap()
+        viewManager = LinearLayoutManager(this)
+        viewAdapter = MyAdapter(keys, scanResults!!)
+        recyclerView = lista.apply {
+            layoutManager = viewManager
+            adapter = viewAdapter
+        }
         bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothAdapter = bluetoothManager.adapter
         bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
-        scanResults = HashMap()
+
         checkPermission()
         button.setOnClickListener {
             if (!bluetoothAdapter.isEnabled) {
@@ -51,16 +68,11 @@ class MainActivity : AppCompatActivity() {
             handler.postDelayed({
                 mScanning = false
                 bluetoothLeScanner.stopScan(leScanCallback)
-                var name = ""
-                var strenght = ""
-                scanResults?.forEach {
-                    val r = it.value
-                    name += "${r.device.address}\n"
-                    strenght += "${r.rssi} dBm\n"
-                }
-                adress.text = name
-                str.text = strenght
                 progress.visibility = View.GONE
+                scanResults?.keys?.forEach{
+                    keys.add(it)
+                }
+                viewAdapter.notifyDataSetChanged()
             }, SCAN_PERIOD)
             progress.visibility = View.VISIBLE
             mScanning = true
@@ -134,7 +146,32 @@ class MainActivity : AppCompatActivity() {
             .create()
             .show()
     }
-
 }
 
+class MyAdapter(private  val keys: MutableList<String>, private val data: HashMap<String, ScanResult>) :
+        RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
+
+    class MyViewHolder(val v: View) : RecyclerView.ViewHolder(v)
+
+    override fun onCreateViewHolder(parent: ViewGroup,
+                                    viewType: Int): MyViewHolder {
+
+        val textView = LayoutInflater.from(parent.context)
+            .inflate(R.layout.teksiview, parent, false) as View
+
+        return MyViewHolder(textView)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+        val r = data[keys[position]]
+        if (r != null) {
+            if (!r.isConnectable) holder.v.isEnabled = false
+            holder.v.name.text = r.device.address
+            holder.v.dbm.text = "${r.rssi} dBm"
+        }
+    }
+
+    override fun getItemCount() = keys.size
+}
 
