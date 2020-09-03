@@ -24,6 +24,16 @@
         android:padding="50dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+    <TextView
+        android:layout_marginTop="20dp"
+        android:id="@+id/heartRate"
+        android:textSize="50sp"
+        android:textAlignment="center"
+        android:textColor="@color/colorAccent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="89"
+        />
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_marginVertical="20dp"
