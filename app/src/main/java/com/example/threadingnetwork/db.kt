@@ -24,8 +24,10 @@ data class ContactInfo (
     val user: Long,
     val type: String,
     @PrimaryKey
-    val value: String
-)
+    val value: String) {
+    override fun toString() = "$type $value"
+}
+
 
 class UserContact {
     @Embedded
@@ -38,6 +40,7 @@ class UserContact {
 interface ContactInfoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(contact: ContactInfo)
+
 }
 @Dao
 interface  UserDao {

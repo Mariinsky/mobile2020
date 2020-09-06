@@ -3,4 +3,10 @@
     <string name="lataa">lataa</string>
     <string name="clear_db">Clear DB</string>
     <string name="add_user">Add user</string>
+    <string name="add_contact">Add Contact</string>
+    <string name="contact_type">contact type</string>
+    <string name="contact_value">contact value</string>
+    <string name="lastname">Lastname</string>
+    <string name="name">Name</string>
+
 </resources>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/user_list_fragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:padding="20dp"
+        android:id="@+id/user_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/colorPrimaryDark"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/add_user_action"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="32dp"
+        app:srcCompat="@drawable/ic_add" />
+    <LinearLayout
+        android:elevation="8dp"
+        android:id="@+id/add_user_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/colorAccent"
+        android:visibility="gone"
+        android:padding="20dp"
+        tools:visibility="visible">
+
+        <EditText
+            android:id="@+id/edit_text_firstname"
+            android:layout_width="match_parent"
+            android:textColorHint="@android:color/black"
+            android:textColor="@android:color/white"
+            android:layout_height="wrap_content"
+            android:ems="20"
+            android:inputType="textPersonName"
+            android:hint="@string/name"
+            />
+        <EditText
+            android:id="@+id/edit_text_lastname"
+            android:textColorHint="@android:color/black"
+            android:textColor="@android:color/white"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="20"
+            android:inputType="textPersonName"
+            android:hint="@string/lastname" />
+
+        <Button
+            android:id="@+id/user_add_confirm"
+            android:textColor="@android:color/white"
+            android:elevation="8dp"
+            android:layout_marginTop="20dp"
+            android:textColorHint="@color/colorAccent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:text="@string/add_user"
+            android:textSize="20sp"
+            />
+
+
+    </LinearLayout>
+
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+
