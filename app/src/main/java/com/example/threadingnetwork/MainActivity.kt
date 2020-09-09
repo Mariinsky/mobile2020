@@ -21,6 +21,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.jjoe64.graphview.series.DataPoint
+import com.jjoe64.graphview.series.LineGraphSeries
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.subjects.PublishSubject
@@ -71,12 +73,30 @@ class MainActivity : AppCompatActivity() {
                 scanLeDevice()
             }
         }
-
+        var lastvalue = 0.0
+        val dataPoints = setupGraph()
         heartRateSubject
             .subscribe {
                 heartRate.text = "$it bpm"
+                dataPoints.appendData(DataPoint(lastvalue, it.toDouble()), true,500)
+                lastvalue += 1
             }
             .addTo(compositeDisposable)
+    }
+
+    private fun setupGraph() : LineGraphSeries<DataPoint>{
+        val datapoints = LineGraphSeries<DataPoint>()
+        datapoints.isDrawDataPoints = true;
+        datapoints.dataPointsRadius = 5f;
+        graph.addSeries(datapoints)
+        graph.viewport.isXAxisBoundsManual = true
+        graph.viewport.isYAxisBoundsManual = true
+        graph.viewport.setMinY(30.0)
+        graph.viewport.setMaxY(200.0)
+        graph.viewport.setMinX(0.0)
+        graph.viewport.setMaxX(50.0)
+        graph.viewport.scrollToEnd()
+        return datapoints
     }
 
     private fun scanLeDevice() {
