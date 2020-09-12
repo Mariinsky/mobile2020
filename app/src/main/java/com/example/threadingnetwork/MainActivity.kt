@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-
 import androidx.documentfile.provider.DocumentFile
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +15,7 @@ import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers.io
 import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
@@ -30,6 +30,8 @@ class MainActivity : AppCompatActivity() {
         title = "folderReader"
 
         read_button.setOnClickListener {
+            files = ""
+            files_list.text = files
             openDirectory()
         }
 
@@ -68,17 +70,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun documentTree(u: Uri): String {
+    private fun documentTree(u: Uri): String? {
         val documentsTree =  DocumentFile.fromTreeUri(application, u)
+        var directories = mutableListOf<DocumentFile>()
+        var string = "\n${documentsTree?.name}\n"
         val childDocuments = documentsTree?.listFiles()
-        var string = ""
         childDocuments?.forEach {
             if (it.isDirectory) {
-                string += "FOLDER: ${it.name}\n"
-                scanFiles.onNext(it.uri)
+                directories.add(it)
             } else {
-                string += "FILE: ${it.name}\n"
+                string += "\t\t -${it.name}\n"
             }
+        }
+        directories.forEach {
+            scanFiles.onNext(it.uri)
         }
         return string
     }
