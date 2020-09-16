@@ -8,16 +8,17 @@
     tools:context=".MainActivity">
 
     <fragment
-        android:id="@+id/sceneform_fragment"
-        android:name="com.google.ar.sceneform.ux.ArFragment"
+        android:id="@+id/arimage_fragment"
         android:layout_width="match_parent"
-        android:layout_weight="1"
-        android:layout_height="0dp"/>
-
-    <Button
-        android:id="@+id/add_button"
-        android:text="@string/add"
+        android:layout_height="match_parent"
+        android:name="com.example.threadingnetwork.imagescene.AImgFrag"/>
+    <ImageView
+        android:id="@+id/fit_to_scan_img"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:scaleType="fitCenter"
+        android:src="@drawable/FitToScan"
+        android:contentDescription="@string/fit_image_to_scan" />
 
 </LinearLayout>
