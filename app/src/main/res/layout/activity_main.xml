@@ -1,25 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <fragment
-        android:id="@+id/arimage_fragment"
+    <fragment android:name="com.example.threadingnetwork.FacesFragment"
+        android:id="@+id/ar_fragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:name="com.example.threadingnetwork.MainActivity$AImgFrag"
-        />
-    <ImageView
-        android:id="@+id/fit_to_scan_img"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:scaleType="fitCenter"
-        android:src="@drawable/fit_to_scan"
-        android:contentDescription="@string/fit_image_to_scan" />
+        android:layout_height="match_parent"/>
 
 </FrameLayout>
